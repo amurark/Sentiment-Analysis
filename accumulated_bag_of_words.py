@@ -3294,4 +3294,5 @@ def createFeatureVector(accumulated_bag_of_words, accumulated_bag_of_phrases, SS
                     else:
                         row.append(0)
                     feature_vector.append(row)
-    print(feature_vector)
+    # print(feature_vector)
+    np.savetxt("foo with not.csv", feature_vector, delimiter=",")

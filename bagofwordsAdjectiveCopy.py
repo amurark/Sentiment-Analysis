@@ -32,14 +32,14 @@ def convert_review_to_words(review_data):
     describers = [(token.lower(),pos) for token, pos in pos_tag(word_tokenize(review_data)) if pos.startswith('J') or pos.startswith('RB') or pos.startswith('V')]
     for word in describers:
         if prev:
-            if prev[0] == "not" and (word[1].startswith('J') or word[1].startswith('V')):
-                processedReview.append(prev[0]+" "+word[0])
-                negated_phrases.append(prev[0]+" "+word[0])
+            if (prev[0] == "not" or prev[0]=="n't") and (word[1].startswith('J') or word[1].startswith('V')):
+                processedReview.append("not "+word[0])
+                negated_phrases.append("not "+word[0])
             else:
                 if pprev:
-                    if pprev[0] == "not" and (word[1].startswith('J') or word[1].startswith('V')):
-                        processedReview.append(pprev[0]+" "+prev[0]+" "+word[0])
-                        negated_phrases.append(pprev[0]+" "+prev[0]+" "+word[0])
+                    if (pprev[0] == "not" or pprev[0]=="n't") and (word[1].startswith('J') or word[1].startswith('V')):
+                        processedReview.append("not "+prev[0]+" "+word[0])
+                        negated_phrases.append("not "+prev[0]+" "+word[0])
                     else:
                         if word[0] != "not" and word[0] != "n't":
                             processedReview.append(word[0])
@@ -152,4 +152,6 @@ accumulated_bag_of_phrases = sorted(accumulated_bag_of_phrases)
 print(accumulated_bag_of_phrases)
 
 
-abw.createFeatureVector(accumulated_bag_of_words, accumulated_bag_of_phrases, SS_t)
+aVector=abw.createFeatureVector(accumulated_bag_of_words, accumulated_bag_of_phrases, SS_t)
+# print(type(aVector))
+# np.savetxt("foo.csv", aVector, delimiter=",")
