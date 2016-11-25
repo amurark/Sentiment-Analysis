@@ -3,6 +3,7 @@ import json
 import re
 import numpy as np
 import pprint;
+import csv
 #import nltk
 from nltk.corpus import stopwords # Import the stop word list
 from nltk import word_tokenize, pos_tag
@@ -15,8 +16,7 @@ sentence = "I tried to take dyed hair from a natural color to white/platinum blo
 #Pos_tag returns tuples for each word in the form (word, POS).
 # J stands for POS tags for adjectives.
 adjectives = [token.lower() for token, pos in pos_tag(word_tokenize(sentence)) if pos.startswith('J') or pos.startswith('RB') or pos.startswith('V')]#Need to add adverbs and verbs.
-
-
+filtered_words = [word for word in adjectives if word not in stopwords.words('english')]
 negated_phrases = []
 #Get all the adjectives from the sentence.
 #Word_Tokenize tokenizes the sentence into words.
@@ -51,7 +51,9 @@ def convert_review_to_words(review_data):
                 processedReview.append(word[0])
         pprev = prev
         prev = word
-    return(processedReview)
+    #Removing stop words like is, so, have etc.
+    filtered_words = [wrd for wrd in processedReview if wrd not in stopwords.words('english')]
+    return(filtered_words)
 
 y=0
 helpful=0
@@ -102,16 +104,25 @@ with open('Beauty_5.json','r') as f:
 
 positive_bag_of_word = Counter(positive_data)
 negative_bag_of_word = Counter(negative_data)
-# print(len(cleaned_data))
-
+print(len(cleaned_data))
 print("review count array : ",star_wise_review_count)
 print("y :",y)
 print("Pos :",len(positive_data))
 print("Neg :",len(negative_data))
 pp = pprint.PrettyPrinter(indent=4)
-pp.pprint(positive_bag_of_word)
-pp.pprint(negative_bag_of_word)
+# pp.pprint(positive_bag_of_word)
+# pp.pprint(negative_bag_of_word)
 pp.pprint(occurence);
+#Creating csv files so that these files can be used directly instead of extracting this data every time.
+csvfile1 = "positive_bag_of_word.csv"
+csvfile2 = "negative_bag_of_word.csv"
+csvfile3 = "occurance.csv"
+with open(csvfile1, 'w') as f:
+    [f.write('{0},{1}\n'.format(key, value)) for key, value in positive_bag_of_word.items()]
+with open(csvfile2, 'w') as f:
+    [f.write('{0},{1}\n'.format(key, value)) for key, value in negative_bag_of_word.items()]
+with open(csvfile3, 'w') as f:
+    [f.write('{0},{1}\n'.format(key, value)) for key, value in occurence.items()]
 
 #Calculate TokenWise sentiment score SS(t)
 SS_t = {}
@@ -129,8 +140,11 @@ for token in occurence:
         SS_t[token] = num/den
 
 print("Sentiment Score:")
-pp.pprint(SS_t)
-
+# pp.pprint(SS_t)
+# np.savetxt("Sentiment_Score.csv", SS_t, delimiter=",")
+Sentiment_Score_csv = "Sentiment_Score.csv"
+with open(Sentiment_Score_csv, 'w') as f:
+    [f.write('{0},{1}\n'.format(key, value)) for key, value in SS_t.items()]
 
 
 accumulated_bag_of_words = []
@@ -141,6 +155,7 @@ for token in occurence:
 print("Accumulated bag of words:")
 accumulated_bag_of_words = sorted(accumulated_bag_of_words)
 print(accumulated_bag_of_words)
+# np.savetxt("accumulated_bag_of_words.csv", accumulated_bag_of_words, delimiter=",")
 
 accumulated_bag_of_phrases = []
 for token in SS_t:
@@ -150,6 +165,7 @@ for token in SS_t:
 print("Accumulated bag of phrases:")
 accumulated_bag_of_phrases = sorted(accumulated_bag_of_phrases)
 print(accumulated_bag_of_phrases)
+# np.savetxt("accumulated_bag_of_phrases.csv", accumulated_bag_of_phrases, delimiter=",")
 
 
 aVector=abw.createFeatureVector(accumulated_bag_of_words, accumulated_bag_of_phrases, SS_t)
