@@ -24,6 +24,9 @@ negated_phrases = []
 # J stands for POS tags for adjectives.
 # RB stands for Adverbs.
 # V stands for verbs.
+
+# for item in abc:
+
 def convert_review_to_words(review_data):
     prev = None
     pPrev = None
@@ -67,6 +70,7 @@ negative_data=[]
 neutral_data=[]
 star_wise_review_count = [0] * 5
 occurence = {}
+thefile = open('clean_data.txt', 'w')
 with open('Beauty_5.json','r') as f:
     for line in f:
         currentLine=json.loads(line)
@@ -80,8 +84,11 @@ with open('Beauty_5.json','r') as f:
             star_wise_review_count[int(currentLine['overall'])-1] += 1
 
             #tokenize and analyze the current review. Clean_data will consists of only adjectives.
-            clean_data = convert_review_to_words(currentLine['summary'])
-
+            clean_data = convert_review_to_words(currentLine['reviewText'])
+            a=""
+            a=str(clean_data)
+            thefile.write(a)
+            thefile.write("\n") 
             #Create an occurence dictionary for rating wise token occurence.
             for word in clean_data:
                 if word in occurence:
@@ -102,6 +109,7 @@ with open('Beauty_5.json','r') as f:
                 print(y,",",clean_data)
             y+=1
 
+thefile.close()
 positive_bag_of_word = Counter(positive_data)
 negative_bag_of_word = Counter(negative_data)
 print(len(cleaned_data))
@@ -127,7 +135,7 @@ with open(csvfile3, 'w') as f:
 #Calculate TokenWise sentiment score SS(t)
 SS_t = {}
 for token in occurence:
-    if positive_bag_of_word[token] > 30 or negative_bag_of_word[token] > 30:
+    if positive_bag_of_word[token] > 150 or negative_bag_of_word[token] > 50:
         SS_t[token] = 0
         num = 0;
         den = 0;
@@ -149,7 +157,7 @@ with open(Sentiment_Score_csv, 'w') as f:
 
 accumulated_bag_of_words = []
 for token in occurence:
-    if positive_bag_of_word[token] > 30 or negative_bag_of_word[token] > 30:
+    if positive_bag_of_word[token] > 150 or negative_bag_of_word[token] > 50:
         accumulated_bag_of_words.append(token)
 
 print("Accumulated bag of words:")
@@ -170,4 +178,4 @@ print(accumulated_bag_of_phrases)
 
 aVector=abw.createFeatureVector(accumulated_bag_of_words, accumulated_bag_of_phrases, SS_t)
 # print(type(aVector))
-# np.savetxt("foo.csv", aVector, delimiter=",")
+# np.savetxt("FinalOutput.csv", aVector, delimiter=",")
